@@ -23,10 +23,9 @@ function createWindow() {
     })
     win.once('ready-to-show', () => {
         win.show()
-        // win.webContents.openDevTools()
+        win.webContents.openDevTools()
     })
-    // win.loadFile('index.html')
-    win.loadURL('https://www.baidu.com');
+    win.loadFile('index.html')
 }
 
 function startCore() {
@@ -38,7 +37,7 @@ function startCore() {
         fs.unlinkSync(ipcPath)
     }
     ipcServer.listen(ipcPath)
-    const core = spawn('core/MiniElectron.Core', [ipcPath])
+    const core = spawn(path.join(__dirname, 'extraResources', 'core/MiniElectron.Core'), [ipcPath])
     core.stdout.on('data', onCoreStdOut)
     core.stderr.on('data', onCoreStdErr)
     core.on('close', onCoreClose)
@@ -60,5 +59,6 @@ function onCoreClose(code, signal) {
 }
 
 function onCoreReceive(data) {
+    BrowserWindow.getFocusedWindow().title = data.toString()
     console.debug("msg ===> " + data.toString())
 }

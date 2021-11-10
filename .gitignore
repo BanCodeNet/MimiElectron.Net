@@ -4,7 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 .DS_Store
-core/
+build/
+out/
+extraResources/
 
 # User-specific files
 *.rsuser
