@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "RID",
+            "type": "pickString",
+            "description": "select a RID",
+            "options": [
+                "osx-x64"
+            ]
+        }
+    ],
+    "tasks": [
+        {
+            "label": "build core",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "-c",
+                "Release",
+                "-r",
+                "${input:RID}",
+                "--self-contained",
+                "-o",
+                "${workspaceFolder}/MiniElectron.Shell/core",
+                "${workspaceFolder}/MiniElectron.Core/MiniElectron.Core.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
