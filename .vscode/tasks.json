@@ -6,7 +6,9 @@
             "type": "pickString",
             "description": "select a RID",
             "options": [
-                "osx-x64"
+                "osx-x64",
+                "win-x64",
+                "linux-x64"
             ]
         }
     ],

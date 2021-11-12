@@ -35,10 +35,7 @@ const createWindow = () => {
 const startCore = () => {
     const ipcPath = path.join(os.tmpdir(), ipcFile)
     bridge = new Bridge(ipcPath)
-    if (!fs.existsSync(corePath)) {
-        dialog.showErrorBox('系统错误', 'Core依赖不存在');
-        return;
-    }
+    if (!fs.existsSync(corePath)) return;
     const core = spawn(corePath, [ipcPath, '6001'])
     core.stdout.on('data', onCoreStdOut)
     core.stderr.on('data', onCoreStdErr)

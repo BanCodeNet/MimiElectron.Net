@@ -16,14 +16,16 @@ class Bridge {
     }
 
     #onReceive(socket: net.Socket, data: Buffer): void {
-        console.debug('msg ===> ' + data.toString())
         const json = JSON.parse(data.toString())
-        console.warn(json)
         let isCallback = false
         switch (json.topic) {
             case "Notification.isSupported":
                 json.body = Notification.isSupported()
                 isCallback = true
+                break;
+            case "Notification.show":
+                let notification = new Notification(json.body)
+                notification.show();
                 break;
         }
         if (isCallback) this.#send(socket, Buffer.from(JSON.stringify(json)))
