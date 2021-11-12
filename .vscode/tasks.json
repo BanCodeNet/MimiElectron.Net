@@ -23,7 +23,7 @@
                 "${input:RID}",
                 "--self-contained",
                 "-o",
-                "${workspaceFolder}/MiniElectron.Shell/extraResources/core",
+                "${workspaceFolder}/MiniElectron.Shell/build/extraResources/core",
                 "${workspaceFolder}/MiniElectron.Core/MiniElectron.Core.csproj"
             ],
             "problemMatcher": "$msCompile"

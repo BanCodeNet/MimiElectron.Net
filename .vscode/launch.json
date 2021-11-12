@@ -6,12 +6,9 @@
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}/MiniElectron.Shell",
-            "runtimeExecutable": "${workspaceFolder}/MiniElectron.Shell/node_modules/.bin/electron",
-            "windows": {
-                "runtimeExecutable": "${workspaceFolder}/MiniElectron.Shell/node_modules/.bin/electron.cmd"
-            },
-            "args": [
-                "."
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start"
             ]
         }
     ]

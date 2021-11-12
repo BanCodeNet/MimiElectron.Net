@@ -5,5 +5,14 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DwFramework.Core" Version="5.1.2"/>
+    <PackageReference Include="DwFramework.Web" Version="5.1.2"/>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="LogConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
