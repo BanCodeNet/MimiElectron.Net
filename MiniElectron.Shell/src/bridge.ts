@@ -16,9 +16,10 @@ class Bridge {
     }
 
     #onReceive(socket: net.Socket, data: Buffer): void {
-        const json = JSON.parse(data.toString())
-        let callback = null
+        let json: any
+        let callback: any
         try {
+            json = JSON.parse(data.toString())
             switch (json.topic) {
                 case "Notification.isSupported":
                     callback = Notification.isSupported()

@@ -5,9 +5,17 @@ import * as path from 'path';
 import { spawn } from 'child_process';
 import { Bridge } from './bridge';
 
-const ipcFile = '.shellIpc'
+const sockName = 'coreToShell'
+let sockPath: string
 const corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core')
-console.debug(corePath)
+switch (os.platform()) {
+    case 'win32':
+        sockPath = path.join('\\\\.\\pipe', sockName)
+        break
+    default:
+        sockPath = path.join(os.tmpdir(), sockName)
+        break
+}
 let bridge: Bridge;
 
 app.on("ready", () => {
@@ -33,10 +41,10 @@ const createWindow = () => {
 }
 
 const startCore = () => {
-    const ipcPath = path.join(os.tmpdir(), ipcFile)
-    bridge = new Bridge(ipcPath)
+    if (sockName == null) return
+    bridge = new Bridge(sockName)
     if (!fs.existsSync(corePath)) return;
-    const core = spawn(corePath, [ipcPath, '6001'])
+    const core = spawn(corePath, [sockName, '6001'])
     core.stdout.on('data', onCoreStdOut)
     core.stderr.on('data', onCoreStdErr)
     core.on('close', onCoreClose)
