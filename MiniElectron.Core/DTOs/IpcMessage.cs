@@ -11,5 +11,7 @@ namespace MiniElectron.Core
         public string Topic { get; init; }
         [JsonPropertyName("body")]
         public dynamic Body { get; init; }
+        [JsonPropertyName("isCallback")]
+        public bool IsCallback { get; init; }
     }
 }

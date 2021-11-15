@@ -5,6 +5,7 @@
             "name": "Debug Main Process",
             "type": "node",
             "request": "launch",
+            "preLaunchTask": "build core",
             "cwd": "${workspaceFolder}/MiniElectron.Shell",
             "runtimeExecutable": "yarn",
             "runtimeArgs": [

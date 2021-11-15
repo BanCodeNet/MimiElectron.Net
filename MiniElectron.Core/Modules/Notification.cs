@@ -10,9 +10,9 @@ namespace MiniElectron.Core
         /// </summary>
         /// <param name="ipcBridge"></param>
         /// <returns></returns>
-        public static Task<IpcMessage> NotificationIsSupported(this IpcBridge ipcBridge) => ipcBridge.Send("Notification.isSupported", waitResponse: true);
+        public static Task<IpcMessage> NotificationIsSupported(this IpcBridge ipcBridge) => ipcBridge.SendAsync("Notification.isSupported", isCallback: true);
 
-        public sealed record NotificationShowOption
+        public sealed record ShowOptions
         {
             public string title { get; init; }
             public string subtitle { get; init; }
@@ -34,6 +34,6 @@ namespace MiniElectron.Core
         /// <param name="ipcBridge"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static Task NotificationShow(this IpcBridge ipcBridge, NotificationShowOption option = null) => ipcBridge.Send("Notification.show", option);
+        public static Task NotificationShow(this IpcBridge ipcBridge, ShowOptions options = null) => ipcBridge.SendAsync("Notification.show", options);
     }
 }

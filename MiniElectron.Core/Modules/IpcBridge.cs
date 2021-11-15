@@ -22,7 +22,7 @@ namespace MiniElectron.Core
             _ipcPath = ipcPath;
         }
 
-        public async Task<IpcMessage> Send(string topic, dynamic body = null, bool waitResponse = false)
+        public async Task<IpcMessage> SendAsync(string topic, dynamic body = null, bool isCallback = false)
         {
             using var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             socket.Connect(new UnixDomainSocketEndPoint(_ipcPath));
@@ -30,11 +30,12 @@ namespace MiniElectron.Core
             {
                 RequestId = Guid.NewGuid().ToString(),
                 Topic = topic,
-                Body = body
+                Body = body,
+                IsCallback = isCallback
             };
             socket.Send(request.ToJsonBytes());
             IpcMessage response = null;
-            if (waitResponse)
+            if (isCallback)
             {
                 var data = new List<byte>();
                 while (true)
@@ -47,7 +48,8 @@ namespace MiniElectron.Core
                 }
                 if (data.Count > 0)
                 {
-                    response = data.ToArray().FromJsonBytes<IpcMessage>();
+                    Console.WriteLine(data.ToArray().FromJsonBytes<dynamic>());
+                    response = request with { Body = data.ToArray().FromJsonBytes<dynamic>() };
                 }
             }
             return response;

@@ -1,4 +1,4 @@
-import { Notification } from 'electron';
+import { Notification, dialog } from 'electron';
 import * as fs from 'fs';
 import * as net from 'net';
 
@@ -17,18 +17,25 @@ class Bridge {
 
     #onReceive(socket: net.Socket, data: Buffer): void {
         const json = JSON.parse(data.toString())
-        let isCallback = false
-        switch (json.topic) {
-            case "Notification.isSupported":
-                json.body = Notification.isSupported()
-                isCallback = true
-                break;
-            case "Notification.show":
-                let notification = new Notification(json.body)
-                notification.show();
-                break;
+        let callback = null
+        try {
+            switch (json.topic) {
+                case "Notification.isSupported":
+                    callback = Notification.isSupported()
+                    break;
+                case "Notification.show":
+                    let notification = new Notification(json.body)
+                    notification.show();
+                    break;
+                case "dialog.showMessageBoxSync":
+                    callback = dialog.showMessageBoxSync(json.body)
+                    break;
+            }
+        } catch (err) {
+            callback = err.message
+        } finally {
+            if (json.isCallback) this.#send(socket, Buffer.from(JSON.stringify(callback)))
         }
-        if (isCallback) this.#send(socket, Buffer.from(JSON.stringify(json)))
     }
 
     #send(socket: net.Socket, data: Buffer): void {
