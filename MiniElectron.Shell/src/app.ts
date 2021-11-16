@@ -7,13 +7,15 @@ import { Bridge } from './bridge';
 
 const sockName = 'coreToShell'
 let sockPath: string
-const corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core')
+let corePath: string
 switch (os.platform()) {
     case 'win32':
         sockPath = path.join('\\\\.\\pipe', sockName)
+        corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core.exe')
         break
     default:
         sockPath = path.join(os.tmpdir(), sockName)
+        corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core')
         break
 }
 let bridge: Bridge;
@@ -41,10 +43,10 @@ const createWindow = () => {
 }
 
 const startCore = () => {
-    if (sockName == null) return
-    bridge = new Bridge(sockName)
+    if (sockName == null || corePath == null) return
+    bridge = new Bridge(sockPath)
     if (!fs.existsSync(corePath)) return;
-    const core = spawn(corePath, [sockName, '6001'])
+    const core = spawn(corePath, [sockPath, '6001'])
     core.stdout.on('data', onCoreStdOut)
     core.stderr.on('data', onCoreStdErr)
     core.on('close', onCoreClose)

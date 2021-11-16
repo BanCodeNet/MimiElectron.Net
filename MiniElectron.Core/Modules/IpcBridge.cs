@@ -37,15 +37,24 @@ namespace MiniElectron.Core
             IpcMessage response = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                using (var stream = new NamedPipeClientStream(".", _sockPath.Split('\\').Last(), PipeDirection.InOut))
+                using var stream = new NamedPipeClientStream(".", _sockPath.Split('\\').Last(), PipeDirection.InOut);
+                stream.Connect(2000);
+                await stream.WriteAsync(request.ToJsonBytes());
+                await stream.FlushAsync();
+                if (isCallback)
                 {
-                    stream.Connect(2000);
-                    using var writer = new StreamWriter(stream);
-                    await writer.WriteLineAsync(request.ToJson());
-                    if (isCallback)
+                    var data = new List<byte>();
+                    while (true)
                     {
-                        using var reader = new StreamReader(stream);
-                        response = request with { Body = (await reader.ReadToEndAsync()).FromJson<dynamic>() };
+                        _buffer = new byte[BufferSize];
+                        var len = await stream.ReadAsync(_buffer);
+                        if (len <= 0) break;
+                        data.AddRange(_buffer[..len]);
+                        if (len < BufferSize || Encoding.UTF8.GetString(data.TakeLast(2).ToArray()) == "\r\n") break;
+                    }
+                    if (data.Count > 0)
+                    {
+                        response = request with { Body = data.ToArray().FromJsonBytes<dynamic>() };
                     }
                 }
             }
