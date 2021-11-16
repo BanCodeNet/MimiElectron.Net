@@ -20,6 +20,6 @@ namespace MiniElectron.Core
             public bool normalizeAccessKeys { get; init; }
         }
 
-        public static Task<CmdMessage> DialogShowMessageBoxSync(this Bridge ipcBridge, ShowMessageBoxSyncOptions options) => ipcBridge.SendAsync("dialog.showMessageBoxSync", options, true);
+        public static Task<Message> DialogShowMessageBoxSync(this Bridge ipcBridge, ShowMessageBoxSyncOptions options) => ipcBridge.SendAsync("dialog.showMessageBoxSync", options, true);
     }
 }

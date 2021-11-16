@@ -10,7 +10,7 @@ namespace MiniElectron.Core
         /// </summary>
         /// <param name="ipcBridge"></param>
         /// <returns></returns>
-        public static Task<CmdMessage> NotificationIsSupported(this Bridge ipcBridge) => ipcBridge.SendAsync("Notification.isSupported", isCallback: true);
+        public static Task<Message> NotificationIsSupported(this Bridge ipcBridge) => ipcBridge.SendAsync("Notification.isSupported", isCallback: true);
 
         public sealed record ShowOptions
         {

@@ -18,7 +18,7 @@ namespace MiniElectron.Core
 
         public int BufferSize = 1024;
 
-        public Func<CmdMessage, object> OnReceive { get; set; }
+        public Func<Message, object> OnReceive { get; set; }
 
         public Bridge(WebService webService)
         {
@@ -54,16 +54,16 @@ namespace MiniElectron.Core
 
         }
 
-        public async Task<CmdMessage> SendAsync(string topic, dynamic body = null, bool isCallback = false)
+        public async Task<Message> SendAsync(string topic, dynamic body = null, bool isCallback = false)
         {
-            var request = new CmdMessage()
+            var request = new Message()
             {
                 RequestId = Guid.NewGuid().ToString(),
                 Topic = topic,
                 Body = body,
                 IsCallback = isCallback
             };
-            CmdMessage response = null;
+            Message response = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 using var stream = new NamedPipeClientStream(".", _sockPath.Split('\\').Last(), PipeDirection.InOut);
