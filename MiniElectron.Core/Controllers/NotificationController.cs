@@ -11,17 +11,17 @@ namespace MiniElectron.Core
     [Route("notification")]
     public sealed class NotificationController : Controller
     {
-        private readonly IpcBridge _ipcBridge;
+        private readonly Bridge _bridge;
 
-        public NotificationController(IpcBridge ipcBridge)
+        public NotificationController(Bridge bridge)
         {
-            _ipcBridge = ipcBridge;
+            _bridge = bridge;
         }
 
         [HttpGet("isSupported")]
         public async Task<dynamic> IsSupported()
         {
-            var message = await _ipcBridge.NotificationIsSupported();
+            var message = await _bridge.NotificationIsSupported();
             return message?.Body;
         }
 
@@ -30,7 +30,7 @@ namespace MiniElectron.Core
         {
             var config = new TypeAdapterConfig();
             config.NewConfig<ShowRequest, Notification.ShowOptions>().NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
-            return _ipcBridge.NotificationShow(request.Adapt<Notification.ShowOptions>(config));
+            return _bridge.NotificationShow(request.Adapt<Notification.ShowOptions>(config));
         }
     }
 

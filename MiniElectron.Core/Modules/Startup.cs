@@ -69,6 +69,7 @@ namespace MiniElectron.Core
                     c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName);
                 }
             });
+            app.UseWebSocket();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {

@@ -1,40 +1,69 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 using System.Net.Sockets;
 using DwFramework.Core;
+using DwFramework.Web;
 
 namespace MiniElectron.Core
 {
-    public sealed class IpcBridge
+    public sealed class Bridge
     {
         private readonly string _sockPath;
         private byte[] _buffer;
 
         public int BufferSize = 1024;
 
-        public Func<IpcMessage, object> OnReceive { get; set; }
+        public Func<CmdMessage, object> OnReceive { get; set; }
 
-        public IpcBridge(string sockPath)
+        public Bridge(WebService webService)
         {
-            _sockPath = sockPath;
+            webService.OnWebSocketConnect += OnConnectHandler;
+            webService.OnWebSocketClose += OnCloseHandler;
+            webService.OnWebSocketError += OnErrorHandler;
+            webService.OnWebSocketReceive += OnReceiveHandler;
+            webService.OnWebSocketSend += OnSendHandler;
         }
 
-        public async Task<IpcMessage> SendAsync(string topic, dynamic body = null, bool isCallback = false)
+        private void OnConnectHandler(WebSocketConnection connection, OnConnectEventArgs args)
         {
-            var request = new IpcMessage()
+
+        }
+
+        private void OnCloseHandler(WebSocketConnection connection, OnCloceEventArgs args)
+        {
+
+        }
+
+        private void OnErrorHandler(WebSocketConnection connection, OnErrorEventArgs args)
+        {
+
+        }
+
+        private void OnReceiveHandler(WebSocketConnection connection, OnReceiveEventArgs args)
+        {
+
+        }
+
+        private void OnSendHandler(WebSocketConnection connection, OnSendEventArgs args)
+        {
+
+        }
+
+        public async Task<CmdMessage> SendAsync(string topic, dynamic body = null, bool isCallback = false)
+        {
+            var request = new CmdMessage()
             {
                 RequestId = Guid.NewGuid().ToString(),
                 Topic = topic,
                 Body = body,
                 IsCallback = isCallback
             };
-            IpcMessage response = null;
+            CmdMessage response = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 using var stream = new NamedPipeClientStream(".", _sockPath.Split('\\').Last(), PipeDirection.InOut);

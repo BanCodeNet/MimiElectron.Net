@@ -14,8 +14,7 @@ namespace MiniElectron.Core
     {
         public static async Task Main(params string[] args)
         {
-            if (args.Length < 1 || string.IsNullOrEmpty(args[0])) throw new Exception("缺少参数:ipcPath");
-            if (args.Length < 2 || !int.TryParse(args[1], out var httpPort)) throw new Exception("缺少参数:httpPort");
+            if (args.Length < 1 || !int.TryParse(args[0], out var httpPort)) throw new Exception("缺少参数:httpPort");
             var host = new ServiceHost();
             host.ConfigureLogging(builder => builder.UserNLog("LogConfig.xml"));
             var configStream = new MemoryStream(new
@@ -35,11 +34,11 @@ namespace MiniElectron.Core
             host.ConfigureWeb(config, builder => builder.UseStartup<Startup>(), "Web");
             host.ConfigureServices(services =>
             {
-                services.AddSingleton(serviceProvider => new IpcBridge(args[0]));
+                services.AddSingleton<Bridge>();
             });
             host.OnHostStarted += provider =>
             {
-                var bridge = provider.GetService<IpcBridge>();
+                var bridge = provider.GetService<Bridge>();
                 bridge.OnReceive = request => Console.WriteLine(Encoding.UTF8.GetString(request.Body) + " ======> " + request.Body.Length);
             };
             await host.RunAsync();

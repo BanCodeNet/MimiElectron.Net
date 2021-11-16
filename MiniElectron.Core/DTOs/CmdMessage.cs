@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace MiniElectron.Core
 {
-    public record IpcMessage
+    public record CmdMessage
     {
         [JsonPropertyName("requestId")]
         public string RequestId { get; init; }
