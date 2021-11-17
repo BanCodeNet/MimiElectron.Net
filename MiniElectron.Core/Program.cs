@@ -36,11 +36,7 @@ namespace MiniElectron.Core
             {
                 services.AddSingleton<Bridge>();
             });
-            host.OnHostStarted += provider =>
-            {
-                var bridge = provider.GetService<Bridge>();
-                bridge.OnReceive = request => Console.WriteLine(Encoding.UTF8.GetString(request.Body) + " ======> " + request.Body.Length);
-            };
+            host.OnHostStarted += provider => { };
             await host.RunAsync();
         }
     }
