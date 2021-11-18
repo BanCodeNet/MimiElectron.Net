@@ -1,25 +1,30 @@
 import { Notification, dialog } from 'electron'
-import { client as WebsocketClient } from 'websocket';
+import { WebSocket } from 'ws'
 import * as fs from 'fs'
 import * as net from 'net'
 
 class Bridge {
-    private ipcServer: net.Server;
-    private client: WebsocketClient;
+    private client: WebSocket
 
-    constructor(httpPort: number) {
-        setTimeout(() => {
-            var connectUrl = 'ws://localhost:' + httpPort
-            this.client = new WebsocketClient()
-            this.client.on('connectFailed', function (error) {
-                console.log('Connect Error: ' + error.toString());
-            });
-            this.client.connect(connectUrl)
-        }, 3000);
-        // this.ipcServer = net.createServer(socket => {
-        //     socket.on('data', data => this.#onReceive(socket, data))
-        // })
-        // this.ipcServer.listen(ipcPath)
+    constructor() { }
+
+    isConnectted(): boolean {
+        if (this.client == null || this.client.readyState != WebSocket.OPEN) return false
+        return true
+    }
+
+    connect(url: string): void {
+        this.client = new WebSocket(url)
+        this.client.on('open', this.#onOpen)
+        this.client.on('error', this.#onError)
+    }
+
+    #onOpen(): void {
+        this.client.send('Register')
+    }
+
+    #onError(err: Error): void {
+        console.log('XXXXX =====> ' + err.message)
     }
 
     #onReceive(socket: net.Socket, data: Buffer): void {
