@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, nativeTheme } from 'electron';
+import { app, BrowserWindow, dialog, Menu, Tray, nativeTheme } from 'electron';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -6,24 +6,22 @@ import { spawn } from 'child_process';
 import { Bridge } from './bridge';
 //import * as ws from 'ws';
 
-const sockName = 'coreToShell'
-let sockPath: string
+const httpPort: number = 6001
 let corePath: string
 switch (os.platform()) {
     case 'win32':
-        sockPath = path.join('\\\\.\\pipe', sockName)
         corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core.exe')
         break
     default:
-        sockPath = path.join(os.tmpdir(), sockName)
         corePath = path.join(__dirname, 'extraResources', 'core/MiniElectron.Core')
         break
 }
 let bridge: Bridge;
 
 app.on("ready", () => {
-    createWindow()
     startCore()
+    createWindow()
+    bridge = new Bridge(httpPort)
 })
 
 app.on("window-all-closed", () => {
@@ -140,10 +138,8 @@ const themeMenu = () => {
 }
 
 const startCore = () => {
-    if (sockName == null || corePath == null) return
-    bridge = new Bridge(sockPath)
     if (!fs.existsSync(corePath)) return;
-    const core = spawn(corePath, [sockPath, '6001'])
+    const core = spawn(corePath, [httpPort.toString()])
     core.stdout.on('data', onCoreStdOut)
     core.stderr.on('data', onCoreStdErr)
     core.on('close', onCoreClose)
@@ -154,6 +150,7 @@ const startCore = () => {
 
 const onCoreStdOut = (data: Buffer) => {
     console.debug(data.toString())
+    if (data.toString() == 'DONE') console.debug('===========>')
 }
 
 const onCoreStdErr = (data: Buffer) => {

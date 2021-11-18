@@ -11,11 +11,11 @@ namespace MiniElectron.Core
     [Route("dialog")]
     public sealed class DialogController : Controller
     {
-        private readonly IpcBridge _ipcBridge;
+        private readonly Bridge _bridge;
 
-        public DialogController(IpcBridge ipcBridge)
+        public DialogController(Bridge bridge)
         {
-            _ipcBridge = ipcBridge;
+            _bridge = bridge;
         }
 
         public sealed record ShowMessageBoxSyncRequest
@@ -49,7 +49,7 @@ namespace MiniElectron.Core
         {
             var config = new TypeAdapterConfig();
             config.NewConfig<ShowMessageBoxSyncRequest, Dialog.ShowMessageBoxSyncOptions>().NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
-            var message = await _ipcBridge.DialogShowMessageBoxSync(request.Adapt<Dialog.ShowMessageBoxSyncOptions>(config));
+            var message = await _bridge.DialogShowMessageBoxSync(request.Adapt<Dialog.ShowMessageBoxSyncOptions>(config));
             return message?.Body;
         }
     }
