@@ -21,8 +21,52 @@ let bridge: Bridge;
 app.on("ready", () => {
     startCore()
     createWindow()
-    bridge = new Bridge(httpPort)
+    bridge = new Bridge()
+    new Promise(async resolve => {
+        while (!bridge.isConnectted()) {
+            try {
+                bridge.connect('ws://localhost:' + httpPort)
+                await new Promise(resolve => setTimeout(resolve, 500))
+            } catch (err) {
+                console.warn(err)
+            }
+        }
+    })
 })
+
+const themeMenu = () => {
+    const template =
+        [
+            {
+                label: 'ThemeSwitch', submenu: [
+                    {
+                        label: 'dark',
+                        click: () => {
+                            let allWins = BrowserWindow.getAllWindows();
+                            if (allWins != null && allWins.length > 0) {
+                                nativeTheme.themeSource = 'dark';
+                                //allWins.forEach(win => win.webContents.send('change_theme', 'dark'));
+                                //ipcRenderer on change_theme
+                            }
+                        }
+                    },
+                    {
+                        label: 'white',
+                        click: () => {
+                            let allWins = BrowserWindow.getAllWindows();
+                            if (allWins != null && allWins.length > 0) {
+                                nativeTheme.themeSource = 'light';
+                                //allWins.forEach(win => win.webContents.send('change_theme', 'white'));
+                                //ipcRenderer on change_theme
+                            }
+                        }
+                    }
+                ]
+            }
+        ];
+    const menu = Menu.buildFromTemplate(template)
+    Menu.setApplicationMenu(menu)
+}
 
 app.on("window-all-closed", () => {
     if (process.platform != "darwin") {
@@ -80,62 +124,6 @@ app.whenReady().then(() => {
 //         }
 //     })
 
-let win
-const createWindow = () => {
-    win = new BrowserWindow({
-        width: 1366,
-        height: 1024,
-        show: false,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        }
-    })
-    win.once('ready-to-show', () => {
-        win.show()
-        // win.webContents.openDevTools()
-    })
-    win.loadFile('index.html')
-    win.on('closed', () => {
-        win = null
-    })
-
-    themeMenu();
-}
-
-const themeMenu = () => {
-    const template =
-        [
-            {
-                label: 'ThemeSwitch', submenu: [
-                    {
-                        label: 'dark',
-                        click: () => {
-                            let allWins = BrowserWindow.getAllWindows();
-                            if (allWins != null && allWins.length > 0) {
-                                nativeTheme.themeSource = 'dark';
-                                //allWins.forEach(win => win.webContents.send('change_theme', 'dark'));
-                                //ipcRenderer on change_theme
-                            }
-                        }
-                    },
-                    {
-                        label: 'white',
-                        click: () => {
-                            let allWins = BrowserWindow.getAllWindows();
-                            if (allWins != null && allWins.length > 0) {
-                                nativeTheme.themeSource = 'light';
-                                //allWins.forEach(win => win.webContents.send('change_theme', 'white'));
-                                //ipcRenderer on change_theme
-                            }
-                        }
-                    }
-                ]
-            }
-        ];
-    const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu)
-}
 
 const startCore = () => {
     if (!fs.existsSync(corePath)) return;
@@ -149,8 +137,7 @@ const startCore = () => {
 }
 
 const onCoreStdOut = (data: Buffer) => {
-    console.debug(data.toString())
-    if (data.toString() == 'DONE') console.debug('===========>')
+
 }
 
 const onCoreStdErr = (data: Buffer) => {
@@ -159,4 +146,28 @@ const onCoreStdErr = (data: Buffer) => {
 
 const onCoreClose = (code: number, signal: NodeJS.Signals) => {
 
+}
+
+let win
+const createWindow = () => {
+    win = new BrowserWindow({
+        width: 1366,
+        height: 1024,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    })
+
+    win.once('ready-to-show', () => {
+        win.show()
+        // win.webContents.openDevTools()
+    })
+    win.loadFile('index.html')
+    win.on('closed', () => {
+        win = null
+    })
+
+    themeMenu();
 }
