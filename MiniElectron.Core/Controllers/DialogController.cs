@@ -18,7 +18,7 @@ namespace MiniElectron.Core
             _bridge = bridge;
         }
 
-        public sealed record ShowMessageBoxSyncRequest
+        public sealed record ShowMessageBoxRequest
         {
             [JsonPropertyName("message")]
             public string Message { get; init; }
@@ -44,12 +44,12 @@ namespace MiniElectron.Core
             public bool NormalizeAccessKeys { get; init; }
         }
 
-        [HttpPost("showMessageBoxSync")]
-        public async Task<dynamic> ShowMessageBoxSync(ShowMessageBoxSyncRequest request)
+        [HttpPost("showMessageBox")]
+        public async Task<dynamic> ShowMessageBoxSync(ShowMessageBoxRequest request)
         {
             var config = new TypeAdapterConfig();
-            config.NewConfig<ShowMessageBoxSyncRequest, Dialog.ShowMessageBoxSyncOptions>().NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
-            var message = await _bridge.DialogShowMessageBoxSync(request.Adapt<Dialog.ShowMessageBoxSyncOptions>(config));
+            config.NewConfig<ShowMessageBoxRequest, Dialog.ShowMessageBoxOptions>().NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
+            var message = await _bridge.DialogShowMessageBox(request.Adapt<Dialog.ShowMessageBoxOptions>(config));
             return message?.Body;
         }
     }

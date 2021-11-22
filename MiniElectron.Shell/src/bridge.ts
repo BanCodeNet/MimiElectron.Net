@@ -3,6 +3,13 @@ import { WebSocket, RawData } from 'ws'
 import * as fs from 'fs'
 import * as net from 'net'
 
+class Message {
+    requestId: string
+    topic: string
+    body: any
+    isCallback: boolean
+}
+
 class Bridge {
     private client: WebSocket
 
@@ -34,30 +41,39 @@ class Bridge {
     }
 
     #onMessage(this: WebSocket, data: RawData, isBinary: boolean): void {
-        let json: any
+        console.log('core to shell =====> ' + data.toString())
+        let message: any
         let callback: any
         try {
-            json = JSON.parse(data.toString())
-            if (json?.topic == null) throw new Error('未定义Topic')
-            switch (json?.topic) {
+            message = JSON.parse(data.toString())
+            if (message == null) return
+            switch (message.topic) {
+                case "Callback":
+                    break;
                 case "Notification.isSupported":
                     callback = Notification.isSupported()
                     break;
                 case "Notification.show":
-                    let notification = new Notification(json.body)
+                    let notification = new Notification(message.body)
                     notification.show();
                     break;
                 case "dialog.showMessageBoxSync":
-                    callback = dialog.showMessageBoxSync(json.body)
+                    callback = dialog.showMessageBoxSync(message.body)
                     break;
                 default:
-                    throw new Error('未定义的Topic:' + json.topic)
+                    break;
             }
         } catch (err) {
             callback = err.message
         } finally {
-            if (json?.isCallback) this.send(callback)
-            console.error(callback)
+            if (message.isCallback) {
+                const callbackMessage = new Message();
+                callbackMessage.requestId = message.requestId
+                callbackMessage.topic = 'Callback'
+                callbackMessage.body = callback
+                callbackMessage.isCallback = false
+                this.send(JSON.stringify(callbackMessage))
+            }
         }
     }
 
