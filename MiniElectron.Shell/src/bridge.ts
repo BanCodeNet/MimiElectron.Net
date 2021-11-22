@@ -41,7 +41,7 @@ class Bridge {
     }
 
     #onMessage(this: WebSocket, data: RawData, isBinary: boolean): void {
-        console.log('core to shell =====> ' + data.toString())
+        console.log('CORE TO SHELL =====> ' + data.toString())
         let message: any
         let callback: any
         try {
@@ -57,7 +57,7 @@ class Bridge {
                     let notification = new Notification(message.body)
                     notification.show();
                     break;
-                case "dialog.showMessageBoxSync":
+                case "Dialog.showMessageBoxSync":
                     callback = dialog.showMessageBoxSync(message.body)
                     break;
                 default:
