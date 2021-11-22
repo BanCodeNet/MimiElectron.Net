@@ -5,6 +5,7 @@ import * as path from 'path';
 import { spawn } from 'child_process';
 import { Bridge } from './bridge';
 //import * as ws from 'ws';
+import { WebSocket } from 'ws'
 
 const httpPort: number = 6001
 let corePath: string
@@ -24,12 +25,8 @@ app.on("ready", () => {
     bridge = new Bridge()
     new Promise(async resolve => {
         while (!bridge.isConnectted()) {
-            try {
-                bridge.connect('ws://localhost:' + httpPort)
-                await new Promise(resolve => setTimeout(resolve, 500))
-            } catch (err) {
-                console.warn(err)
-            }
+            bridge.connect('ws://localhost:' + httpPort)
+            await new Promise(resolve => setTimeout(resolve, 500))
         }
     })
 })
@@ -137,7 +134,7 @@ const startCore = () => {
 }
 
 const onCoreStdOut = (data: Buffer) => {
-
+    console.debug(data.toString())
 }
 
 const onCoreStdErr = (data: Buffer) => {

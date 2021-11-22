@@ -32,10 +32,7 @@ namespace MiniElectron.Core
             }.ToJsonBytes());
             var config = new ConfigurationBuilder().AddJsonStream(configStream).Build();
             host.ConfigureWeb(config, builder => builder.UseStartup<Startup>(), "Web");
-            host.ConfigureServices(services =>
-            {
-                services.AddSingleton<Bridge>();
-            });
+            host.RegisterFromAssemblies();
             host.OnHostStarted += provider => { };
             await host.RunAsync();
         }
