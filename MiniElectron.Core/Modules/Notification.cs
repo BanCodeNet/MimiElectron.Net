@@ -8,9 +8,9 @@ namespace MiniElectron.Core
         /// <summary>
         /// 当前系统是否支持桌面通知
         /// </summary>
-        /// <param name="ipcBridge"></param>
+        /// <param name="bridge"></param>
         /// <returns></returns>
-        public static Task<Message> NotificationIsSupported(this Bridge ipcBridge) => ipcBridge.SendAsync("Notification.isSupported", isCallback: true);
+        public static Task<Message> NotificationIsSupported(this Bridge bridge) => bridge.SendAsync("Notification.isSupported", isCallback: true);
 
         public sealed record ShowOptions
         {
@@ -31,9 +31,9 @@ namespace MiniElectron.Core
         /// <summary>
         /// 即时向用户展示桌面通知
         /// </summary>
-        /// <param name="ipcBridge"></param>
+        /// <param name="bridge"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static Task NotificationShow(this Bridge ipcBridge, ShowOptions options = null) => ipcBridge.SendAsync("Notification.show", options);
+        public static Task NotificationShow(this Bridge bridge, ShowOptions options = null) => bridge.SendAsync("Notification.show", options);
     }
 }

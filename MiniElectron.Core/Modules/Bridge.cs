@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.IO.Pipes;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -11,14 +8,13 @@ using DwFramework.Web;
 
 namespace MiniElectron.Core
 {
-    [Registerable(isAutoActivate: true)]
+    [Registerable(lifetime: Lifetime.Singleton, isAutoActivate: true)]
     public sealed class Bridge
     {
         private readonly ILogger<Bridge> _logger;
-        private byte[] _buffer;
         private WebSocketConnection _shellConnection;
+        private Dictionary<string, (DateTime ExprieTime, object Response)> _callbackPool = new();
 
-        public int BufferSize { get; set; } = 1024;
         public Func<Message, object> OnReceive { get; set; }
 
         public Bridge(ILogger<Bridge> logger, WebService webService)
@@ -48,15 +44,39 @@ namespace MiniElectron.Core
 
         private void OnReceiveHandler(WebSocketConnection connection, OnReceiveEventArgs args)
         {
-            _logger.LogDebug(Encoding.UTF8.GetString(args.Data));
-            var message = args.Data.FromJsonBytes<Message>();
-            if (message == null) return;
-            switch (message.Topic)
+            Console.WriteLine($"shell to core =====> {Encoding.UTF8.GetString(args.Data)}");
+            Message message = null;
+            dynamic callback = null;
+            try
             {
-                case "Register":
-                    _shellConnection = connection;
-                    _logger.LogInformation($"Shell已连接: {_shellConnection.ID}");
-                    break;
+                message = args.Data.FromJsonBytes<Message>();
+                if (message == null) return;
+                switch (message.Topic)
+                {
+                    case "Callback":
+                        if (!_callbackPool.ContainsKey(message.RequestId)) return;
+                        _callbackPool[message.RequestId] = (DateTime.Now.AddMilliseconds(3000), message.Body);
+                        break;
+                    case "Register":
+                        _shellConnection = connection;
+                        _logger.LogInformation($"Shell已连接: {_shellConnection.ID}");
+                        break;
+                    default:
+                        callback = OnReceive?.Invoke(message);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                callback = ex.Message;
+            }
+            finally
+            {
+                if (message != null && message.IsCallback)
+                {
+                    var callbackMessage = message with { Body = callback, IsCallback = false };
+                    connection.SendAsync(message.ToJsonBytes());
+                }
             }
         }
 
@@ -65,7 +85,7 @@ namespace MiniElectron.Core
 
         }
 
-        public async Task<Message> SendAsync(string topic, dynamic body = null, bool isCallback = false)
+        public async Task<Message> SendAsync(string topic, dynamic body = null, bool isCallback = false, double expireMilliseconds = 3000)
         {
             var request = new Message()
             {
@@ -78,7 +98,14 @@ namespace MiniElectron.Core
             await _shellConnection.SendAsync(request.ToJsonBytes());
             if (isCallback)
             {
-                response = request with { Body = data.ToArray().FromJsonBytes<dynamic>() };
+                _callbackPool[request.RequestId] = (expireMilliseconds > 0 ? DateTime.Now.AddMilliseconds(expireMilliseconds) : default, null);
+                while (
+                    (default == _callbackPool[request.RequestId].ExprieTime || DateTime.Now < _callbackPool[request.RequestId].ExprieTime)
+                    && _callbackPool[request.RequestId].Response == null
+                ) await Task.Delay(500);
+                if (_callbackPool[request.RequestId].Response == null) response = request with { Body = "请求超时" };
+                else response = request with { Body = _callbackPool[request.RequestId].Response };
+                _callbackPool.Remove(request.RequestId);
             }
             return response;
         }

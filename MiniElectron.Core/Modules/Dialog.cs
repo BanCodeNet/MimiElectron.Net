@@ -5,7 +5,7 @@ namespace MiniElectron.Core
 {
     public static class Dialog
     {
-        public sealed record ShowMessageBoxSyncOptions
+        public sealed record ShowMessageBoxOptions
         {
             public string message { get; init; }
             public string type { get; init; }
@@ -20,6 +20,12 @@ namespace MiniElectron.Core
             public bool normalizeAccessKeys { get; init; }
         }
 
-        public static Task<Message> DialogShowMessageBoxSync(this Bridge ipcBridge, ShowMessageBoxSyncOptions options) => ipcBridge.SendAsync("dialog.showMessageBoxSync", options, true);
+        /// <summary>
+        /// 显示一个消息框
+        /// </summary>
+        /// <param name="bridge"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static Task<Message> DialogShowMessageBox(this Bridge bridge, ShowMessageBoxOptions options) => bridge.SendAsync("dialog.showMessageBoxSync", options, true, -1);
     }
 }
